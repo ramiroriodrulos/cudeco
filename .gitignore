@@ -23,6 +23,8 @@ ehthumbs_vista.db\
 # Recycle Bin used on file shares\
 $RECYCLE.BIN/\
 \
+node_modules
+vendor
 # Windows Installer files\
 *.cab\
 *.msi\
