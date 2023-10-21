@@ -1,29 +1,34 @@
 <?php 
 require_once('config/config.php');
 
-$mail = $_POST['mail'];
-$contrasena = $_POST['contrasena'];
-
 //Fueron ingresados un mail y contraseña
-if (isset($mail) || !empty(trim($mail)))
+if (!empty($_POST['mail']) || !empty($_POST['contrasena']))
 {
-  //Genero contraseña encriptada y consulto a la base de datos.
-  $contrasenaConSal = "456y45rghtrhfgrhywsetr".$contrasena."fdgfdsgsfgd";
-  $contraseñaEncriptada = hash ('sha512',$contrasenaConSal);
+  $mail = $_POST['mail'];
+  $contrasena = $_POST['contrasena'];
 
-  $consultaBaseDatos = " SELECT * FROM usuario WHERE mail = '$mail' AND contrasenaHash = '$contraseñaEncriptada'";
-  $resultado = $conexion->query($consultaBaseDatos);
-  $resultadoVector = $resultado->fetch_assoc();
+  //Genero contraseña encriptada y consulto a la base de datos.
+  $contraseñaEncriptada = hash ('sha512',$contrasena);
+
+  $ArmoConsultaBD1 = " SELECT * FROM usuario WHERE mail = '$mail' AND contrasenaEncriptada = '$contraseñaEncriptada'";
+  $ConsultaBD1 = $conexion->query($ArmoConsultaBD1);
+  $Resultado1 = $ConsultaBD1->fetch_assoc();
 
   //Existe usuario
-  if ($resultado->num_rows > 0)
+  if(isset($Resultado1))
   {
     session_start();
-    $_SESSION['nombre'] = $resultadoVector['nombre'];
-    $_SESSION['idUsuario'] = $resultadoVector['idUsuario'];
+    $_SESSION['nombreUsuario'] = $Resultado1['nombre'];
+    $_SESSION['idUsuario'] = $Resultado1['idUsuario'];
+    $idUsuario = $Resultado1['idUsuario'];
 
-    header("Location: sheet1.php");
-    exit;
+    $ArmoConsultaBD2 = " SELECT * FROM profesional WHERE idUsuario = $idUsuario";
+    $ConsultaBD2 = $conexion->query($ArmoConsultaBD2);
+    $Resultado2 = $ConsultaBD2->fetch_assoc();
+
+    $_SESSION['esProfesional'] = isset($Resultado2) ? 1 : 0; // 1 = Verdadero. 0 = Falso.
+
+    header("Location: home.php");
   }
   else
   {

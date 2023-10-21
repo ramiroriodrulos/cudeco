@@ -15,6 +15,7 @@ session_destroy();
     <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/mdb.min.css" />
   </head>
 <body>
   <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
@@ -42,7 +43,7 @@ session_destroy();
                   <input class="btn btn-block login-btn mb-4" type="submit" value="Entrar">
                 </form>
                 <a href="#!" class="forgot-password-link">Olvidé mi contaseña</a>
-                <p class="login-card-footer-text">¿No tenes una cuenta? <a href="#!" class="text-reset">Registrate ahora</a></p>
+                <p class="login-card-footer-text">¿No tenes una cuenta? <a href="registro.php" class="text-reset">Registrate ahora</a></p>
                 <nav class="login-card-footer-nav">
                   <a href="#!">Términos de uso.</a>
                   <a href="#!">Política de privacidad</a>

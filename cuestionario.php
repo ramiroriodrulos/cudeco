@@ -2,50 +2,98 @@
 session_start();
 require_once('config/config.php');
 
-//Respuestas. 1ra parte - Sec. A - Sonidos de cosas y animales.
-$am =(isset($_POST['am']) ? "1" : "0") ;
-$cuacua =(isset($_POST['cuacua']) ? "1" : "0") ;
-$muu =(isset($_POST['muu']) ? "1" : "0") ;
-$quiquiriqui =(isset($_POST['quiquiriqui']) ? "1" : "0") ;
-$ay =(isset($_POST['ay']) ? "1" : "0") ;
-$guauguaubabau =(isset($_POST['guauguaubabau']) ? "1" : "0") ;
-$piopio =(isset($_POST['piopio']) ? "1" : "0") ;
-$rumrum =(isset($_POST['rumrum']) ? "1" : "0") ;
-$beemee =(isset($_POST['beemee'] ) ? "1" : "0") ;
-$miau =(isset($_POST['miau'])? "1" : "0") ;
-$pum = (isset($_POST['pum']) ? "1" : "0") ;
-$tutu = (isset($_POST['tutu']) ? "1" : "0") ;
+    $actual = $_SESSION ['paginaActual'];
+    $ultima = $_SESSION ['ultimaPagina'];
+    $accion = $_POST ['accion']; 
+    
+    //Error. Pagina no valida. Vuelvo a inicio.
+    if ($actual > $ultima)
+    {
+        header("Location: sheet2.php?page=1");  
+    }
 
-//Obtengo ID del cuestionario del usuario
-$ArmoConsultaBD1 = "SELECT idResponsable FROM responsable INNER JOIN usuario ON responsable.idUsuario = '{$_SESSION['idUsuario']}' LIMIT 1";
-$ConsultaBD1 = $conexion->query($ArmoConsultaBD1);
-$Resultado1 = $ConsultaBD1->fetch_assoc();
-$idResponsable = $Resultado1['idResponsable'];
+    //Obtengo los IDs de las opciones que pertenecen a la pagina en la que estoy parado
+    $ArmoConsultaBD1 = "SELECT idOpcion FROM opcion WHERE idCategoria IN (SELECT idCategoria FROM categoria WHERE pagina = $actual) ORDER BY idOpcion ASC";
+    $ConsultaBD1 = $conexion->query($ArmoConsultaBD1);
+    $Resultado1 = $ConsultaBD1->fetch_assoc();
 
-$ArmoConsultaBD2 = "SELECT idCuestionario FROM cuestionario WHERE idResponsable = $idResponsable  LIMIT 1";
-$ConsultaBD2 = $conexion->query($ArmoConsultaBD2);
-$Resultado2 = $ConsultaBD2->fetch_assoc();
-$idCuestionario = $Resultado2['idCuestionario'];
+    $ConsultaBD1->data_seek(0);
+    $primerID = $ConsultaBD1->fetch_assoc();
+    $desde = $primerID['idOpcion'];
 
-//Inserto datos
-$ArmoConsultaBD3 = 
-" INSERT INTO seccionA (idSeccionA,idCuestionario,idOpcion,seleccionada,idSubseccion) 
-VALUES 
-(NULL, $idCuestionario, '1', $am, '1'),
-(NULL, $idCuestionario, '2', $cuacua, '1'),
-(NULL, $idCuestionario, '3', $muu, '1'),
-(NULL, $idCuestionario, '4', $quiquiriqui, '1'),
-(NULL, $idCuestionario, '5', $ay, '1'),
-(NULL, $idCuestionario, '6', $guauguaubabau, '1'),
-(NULL, $idCuestionario, '7', $piopio, '1'),
-(NULL, $idCuestionario, '8', $rumrum, '1'),
-(NULL, $idCuestionario, '9', $beemee, '1'),
-(NULL, $idCuestionario, '10', $miau, '1'),
-(NULL, $idCuestionario, '11', $pum, '1'),
-(NULL, $idCuestionario, '12', $tutu, '1')
- ";
+    $ConsultaBD1->data_seek($ConsultaBD1->num_rows - 1);
+    $ultimoID = $ConsultaBD1->fetch_assoc();
+    $hasta = $ultimoID['idOpcion'];
 
-$ConsultaBD3 = $conexion->query($ArmoConsultaBD3);
+    //Guardo las respuestas en la memoria local del navegador
+    for ($i = $desde; $i <= $hasta; $i++) 
+    {
+        $posicion = ("o" . strval($i));
+        $seleccionada =(isset($_POST[$posicion]) ? 1 : 0) ; //1 = seleccionada (true). 0 = no seleccionada (false)
+        $_SESSION [$posicion] = $seleccionada;
+    };
 
-header("Location: index.php");  
+    //Sigo compleando el formulario
+    if ($accion == "atras")
+    {
+        $redireccion = $actual - 1;
+        header("Location: sheet2.php?page=$redireccion");  
+    }
+    else if ($accion == "siguiente")
+    {
+        $redireccion = $actual + 1;
+        header("Location: sheet2.php?page=$redireccion");      
+    }
+
+    //Formulario completado, persisto en la base de datos
+    else if ($accion == "completar") 
+    {
+
+
+        //Obtengo ID del cuestionario del usuario
+        $ArmoConsultaBD2 = "SELECT idResponsable FROM responsable INNER JOIN usuario ON responsable.idUsuario = '{$_SESSION['idUsuario']}' LIMIT 1";
+        $ConsultaBD2 = $conexion->query($ArmoConsultaBD2);
+        $Resultado2 = $ConsultaBD2->fetch_assoc();
+        $idResponsable = $Resultado2['idResponsable'];
+
+        $ArmoConsultaBD3 = "SELECT idCuestionario FROM cuestionario WHERE idResponsable = $idResponsable  LIMIT 1";
+        $ConsultaBD3 = $conexion->query($ArmoConsultaBD3);
+        $Resultado3 = $ConsultaBD3->fetch_assoc();
+        $idCuestionario = $Resultado3['idCuestionario'];
+
+        //Valido cantidad de opciones existentes en la base de datos
+        $ArmoConsultaBD4 = "SELECT COUNT(idOpcion) as 'cantidad' FROM opcion";
+        $ConsultaBD4 = $conexion->query($ArmoConsultaBD4);
+        $Resultado4 = $ConsultaBD4->fetch_assoc();
+        $max = $Resultado4['cantidad'];
+
+        //Inserto la respuesta que cada opcion en la base de datos
+        $ArmoConsultaBD5 = "INSERT INTO RespuestaSeccionA (idRespuestaSeccionA, idCuestionario, idOpcion, seleccionada) VALUES ";
+
+        for ($i = 1; $i <= $max; $i++) {
+            $idOpcion = ("o" . strval($i));
+            $seleccionada =(isset($_SESSION[$idOpcion]) ? $_SESSION[$idOpcion] : 0) ; //Si no encuentra el valor en las variables globales, lo setea en 0.
+
+            if ($i == $max) //Es el ultimo registro
+            {
+                $ArmoConsultaBD5 .= " (NULL, $idCuestionario, $i, $seleccionada) ";
+            }
+            else
+            {
+                $ArmoConsultaBD5 .= " (NULL, $idCuestionario, $i, $seleccionada),";
+            }
+        }
+
+       $conexion->query($ArmoConsultaBD5);
+
+        //Marco cuestionario como completado 
+
+        $fechaConHora = new DateTime("now", new DateTimeZone('America/Argentina/Buenos_Aires'));
+        $fechaHoy = $fechaConHora->format('Y-m-d');
+
+        $ArmoConsultaBD6 = "UPDATE cuestionario SET fechaCompletado = '$fechaHoy' ";
+        $ConsultaBD6 = $conexion->query($ArmoConsultaBD6);
+
+        header("Location: home.php");  
+    }
 ?>
