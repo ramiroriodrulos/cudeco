@@ -104,7 +104,7 @@ $_SESSION ['ultimaPagina'] = $UltimaPagina;
                                         <?php if ($verRespuesta) :
                                           $nombreOpcion = strval($Resultado2['nombre']);
                                           $idOpcion = $Resultado2['idOpcion'];
-                                          $ArmoConsultaBD4 = "SELECT o.nombre, r.seleccionada FROM RespuestaSeccionA r INNER JOIN opcion o on r.idOpcion = o.idOpcion WHERE r.idCuestionario = $idCuestionario AND o.idOpcion = $idOpcion;";
+                                          $ArmoConsultaBD4 = "SELECT o.nombre, r.seleccionada FROM ParteUnoRespuestaSeccionA r INNER JOIN opcion o on r.idOpcion = o.idOpcion WHERE r.idCuestionario = $idCuestionario AND o.idOpcion = $idOpcion;";
                                           $ConsultaBD4 = $conexion->query($ArmoConsultaBD4); 
                                           $Resultado4 = $ConsultaBD4->fetch_assoc()      
                                         ?>

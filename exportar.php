@@ -48,7 +48,7 @@ if (isset($_POST['exportarID']) && !isset($_POST['accion']))
     $idCuestionario = $_POST['exportarID'];
 
     $ArmoConsultaBD1 = 
-    "SELECT o.nombre as 'opcion', c.Detalle as 'categoria' FROM RespuestaSeccionA r
+    "SELECT o.nombre as 'opcion', c.Detalle as 'categoria' FROM ParteUnoRespuestaSeccionA r
     INNER JOIN opcion o on r.idOpcion = o.idOpcion
     INNER JOIN categoria c on o.idCategoria = c.idCategoria
     WHERE idCuestionario = $idCuestionario AND seleccionada = 1 ";

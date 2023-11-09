@@ -68,7 +68,7 @@ require_once('config/config.php');
         $max = $Resultado4['cantidad'];
 
         //Inserto la respuesta que cada opcion en la base de datos
-        $ArmoConsultaBD5 = "INSERT INTO RespuestaSeccionA (idRespuestaSeccionA, idCuestionario, idOpcion, seleccionada) VALUES ";
+        $ArmoConsultaBD5 = "INSERT INTO ParteUnoRespuestaSeccionA (idParteUnoParteUnoRespuestaSeccionA, idCuestionario, idOpcion, seleccionada) VALUES ";
 
         for ($i = 1; $i <= $max; $i++) {
             $idOpcion = ("o" . strval($i));
