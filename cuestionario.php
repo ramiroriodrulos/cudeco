@@ -33,7 +33,7 @@ require_once('config/config.php');
         $_SESSION [$posicion] = $seleccionada;
     };
 
-    //Sigo compleando el formulario
+    //Sigo completando el formulario
     if ($accion == "atras")
     {
         $redireccion = $actual - 1;

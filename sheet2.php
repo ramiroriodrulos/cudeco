@@ -3,11 +3,21 @@ session_start();
 require_once('validarSesion.php');
 require_once('config/config.php');
 
-//No es familiar/responsable, no puede entrar.
-if (($_SESSION['esProfesional']))
+$verRespuesta = false;
+
+//Es profesional y no accedió desde el boton VER en 'mis pacientes', no puede entrar.
+if ($_SESSION['esProfesional'] && !isset($_SESSION['idCuestionario']))
 {
     header("Location: index.php");
 }
+
+//Es profesional y accedió desde el boton VER en 'mis pacientes', puede entrar.
+if ($_SESSION['esProfesional'] && isset($_SESSION['idCuestionario']))
+{
+  $verRespuesta = true;
+  $idCuestionario = $_SESSION['idCuestionario'];
+}
+
 
 if (isset($_GET['page'])) {
   $page = $_GET['page'];
@@ -15,6 +25,8 @@ if (isset($_GET['page'])) {
 else {  
   $page = 1;
 }
+
+
 
 $ArmoConsultaBD1 = "SELECT Detalle, idCategoria FROM categoria WHERE pagina = $page;";
 $ConsultaBD1 = $conexion->query($ArmoConsultaBD1);
@@ -62,7 +74,7 @@ $_SESSION ['ultimaPagina'] = $UltimaPagina;
                         while  ($Resultado1 = $ConsultaBD1->fetch_assoc()){
                         ?>
                         <!-- Pregunta -->
-                        <div class="card bg-secondary text-center text-white"> 
+                        <div class="card bg-dark text-center text-white"> 
                         <h3><?php echo $Resultado1['Detalle'];?></h3>
                         </div>
 
@@ -80,12 +92,27 @@ $_SESSION ['ultimaPagina'] = $UltimaPagina;
                                       while  ($Resultado2 = $ConsultaBD2->fetch_assoc()){
                                     ?>
                                       <div class="form-check form-check-inline " style="width: 200px; height: 30px; text-align: left;">
+
+                                      <!-- Es responsable/familiar, muestro opciones para completar  -->
+                                      <?php if (!$verRespuesta) :?>
                                       <?php $id=("o" . $Resultado2['idOpcion']); $nombreOpcion = strval($Resultado2['nombre']); ?>
                                         <input class="form-check-input" type="checkbox" id= "<?php echo $id ?>" <?php if( $_SESSION[$id] == 1) echo " checked" ?> name= "<?php echo $id ?>" >
                                         <label class="form-check-label" for= "<?php echo $id ?>" > <?php echo $nombreOpcion; ?> </label>
-                                        
+                                        <?php endif;?>
+
+                                        <!-- Es profesional, muestro las opciones respondidas de un paciente en especifico -->
+                                        <?php if ($verRespuesta) :
+                                          $nombreOpcion = strval($Resultado2['nombre']);
+                                          $idOpcion = $Resultado2['idOpcion'];
+                                          $ArmoConsultaBD4 = "SELECT o.nombre, r.seleccionada FROM RespuestaSeccionA r INNER JOIN opcion o on r.idOpcion = o.idOpcion WHERE r.idCuestionario = $idCuestionario AND o.idOpcion = $idOpcion;";
+                                          $ConsultaBD4 = $conexion->query($ArmoConsultaBD4); 
+                                          $Resultado4 = $ConsultaBD4->fetch_assoc()      
+                                        ?>
+                                        <input class="form-check-input" type="checkbox" <?php if( $Resultado4['seleccionada'] == 1) echo " checked" ?> disabled>
+                                        <label class="form-check-label"> <?php echo $nombreOpcion; ?> </label> 
+                                        <?php endif;?>
                                       </div>
-                                      <?php }?>
+                                      <?php }?>                                      
                                     </div>
                         <!-- Fin opciones --> 
                         </div>     
@@ -95,7 +122,11 @@ $_SESSION ['ultimaPagina'] = $UltimaPagina;
                             <div class="text-center">
                             <button type="submit" class="btn btn-primary btn-lg" <?php if ($page == 1) echo "disabled" ?> name="accion" value="atras" >Atrás</button>
                             <button type="submit" class="btn btn-primary btn-lg" <?php if ($page == $UltimaPagina) echo "disabled" ?> name="accion" value="siguiente">Siguiente</button>
+                            
+                            <!-- Muestro el boton completar solo si es un familiar/responsable -->
+                            <?php if (!$verRespuesta) :?>
                             <button type="submit" class="btn btn-dark btn-lg" <?php if ($page != $UltimaPagina) echo "disabled" ?> name="accion" value="completar">Completar</button>
+                            <?php endif;?>
                           </div>    
       
                       

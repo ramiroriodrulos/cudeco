@@ -3,11 +3,30 @@ session_start();
 require_once('validarSesion.php');
 require_once('config/config.php');
 
-//No es familiar/responsable, no puede entrar.
-if (($_SESSION['esProfesional']))
+$verRespuesta = false;
+
+//Es profesional y no accedió desde el boton VER en 'mis pacientes', no puede entrar.
+if ($_SESSION['esProfesional'] && !isset($_SESSION['idCuestionario']))
 {
     header("Location: index.php");
 }
+
+//Es profesional y accedió desde el boton VER en 'mis pacientes', puede entrar.
+if ($_SESSION['esProfesional'] && isset($_SESSION['idCuestionario']))
+{
+    $verRespuesta = true;
+
+    $idCuestionario = $_SESSION['idCuestionario'];
+    $ArmoConsultaBD1 = "SELECT h.nombre,h.dni, h.sexo, h.fechaNacimiento FROM cuestionario c INNER JOIN hijo h on c.idHijo = h.idhijo WHERE c.idCuestionario = $idCuestionario;";
+    $ConsultaBD1 = $conexion->query($ArmoConsultaBD1);
+    $Resultado1 = $ConsultaBD1->fetch_assoc();
+
+    $nombre = $Resultado1["nombre"];
+    $dni = $Resultado1["dni"];
+    $fechaNacimiento = $Resultado1["fechaNacimiento"];
+    $sexo = $Resultado1["sexo"];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -27,13 +46,13 @@ if (($_SESSION['esProfesional']))
    
 <?php include 'header.php'?>
 
-    <section class="content">
+    <section class="content" style="height: 60vh;display: flex; align-items: center; justify-content: center;">
         <div class="container">
             <div class="row">
                 <div class="col-md-2"></div>
                 <div class="col-md-8 p-2">
                     <div class="card bg-danger text-center text-white">
-                        <h3>Datos de tu hijo/a</h3>
+                        <h3>Datos hijo/a</h3>
                     </div>
                     <form action="registrohijo.php" method="POST">
                         <div class="card-body">
@@ -42,24 +61,24 @@ if (($_SESSION['esProfesional']))
                                     <hr>
                                     <div class="form-group">
                                         <label for="nombre">Nombre del niño o niña</label>
-                                        <input type="text" class="form-control" name="nombre" id="nombre" placeholder="" required>
+                                        <input type="text" class="form-control" name="nombre" id="nombre" placeholder="" required <?php if($verRespuesta){ echo " value=$nombre disabled";}?>>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="dni">Número de identificación</label>
-                                        <input type="text" class="form-control" name="dni" id="dni" placeholder="">
+                                        <input type="text" class="form-control" name="dni" id="dni" placeholder="" <?php if($verRespuesta){ echo " value=$dni disabled";}?> >
                                     </div>
                                     
                                     <span>Sexo</span>
-                                    <select class="form-select" name="sexo">
-                                    <option selected>Selecciona</option>
-                                    <option value="1">Masculino</option>
-                                    <option value="2">Femenino</option>
+                                    <select class="form-select" name="sexo" <?php if($verRespuesta){ echo "disabled";}?>>
+                                    <option selected><?php if($verRespuesta){ echo "$sexo";}else{ echo "Selecciona";}?></option>
+                                    <option name="sexo" id="sexo" value="Masculino">Masculino</option>
+                                    <option name="sexo" id="sexo" value="Femenino">Femenino</option>
                                     </select>
 
                                     <div class="form-group">
                                         <label for="nacimiento">Fecha de nacimiento</label>
-                                        <input type="date" class="form-control" name="nacimiento" id="nacimiento" placeholder="">
+                                        <input type="date" class="form-control" name="nacimiento" id="nacimiento" placeholder="" <?php if($verRespuesta){ echo " value=$fechaNacimiento disabled";}?>>
                                     </div>
 
                                 </div>

@@ -3,11 +3,25 @@ session_start();
 require_once('validarSesion.php');
 require_once('config/config.php');
 
+//Es profesional y no accedió desde el boton VER en 'mis pacientes', no puede entrar.
+if ($_SESSION['esProfesional'] && !isset($_SESSION['idCuestionario']))
+{
+    header("Location: index.php");
+}
+
+//Es profesional y accedió desde el boton VER en 'mis pacientes', puede entrar.
+if ($_SESSION['esProfesional'] && isset($_SESSION['idCuestionario']))
+{
+    header("Location: sheet2.php");  
+}
+
+
 //Respuestas. Registro
 $nombre = $_POST['nombre'];
 $dni = $_POST['dni'];
 $nacimiento = $_POST['nacimiento'];
 $dni = $_POST['dni'];
+$sexo = $_POST['sexo'];
 
 //Calculos auxiliares
 $hoy = date('d-m-Y');
@@ -17,7 +31,7 @@ $Meses = $d2->diff($d1);
 $edadMeses = (($Meses->y) * 12) + ($Meses->m);
 
 //Inserto hijo
-$ArmoConsultaBD1 = "INSERT INTO hijo (idhijo,fechaNacimiento,edadMeses,nombre,dni) VALUES (NULL, '$nacimiento' , $edadMeses , '$nombre', $dni) ";
+$ArmoConsultaBD1 = "INSERT INTO hijo (idhijo,fechaNacimiento,edadMeses,nombre,dni,sexo) VALUES (NULL, '$nacimiento' , $edadMeses , '$nombre', $dni, '$sexo') ";
 $ConsultaBD1 = $conexion->query($ArmoConsultaBD1);
 
 //Actualizo hijo en los datos del cuestionario

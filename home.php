@@ -49,7 +49,7 @@ if (!$_SESSION['esProfesional'])
    
 <?php include 'header.php'?>
 
-  <main>
+  <main style="height: 60vh;display: flex; align-items: center; justify-content: center;">
   <div class="text-center">
       <p>
         <h1>Hola, <?php print_r($_SESSION['nombreUsuario'])?>. </h1>
