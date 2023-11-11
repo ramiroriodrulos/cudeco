@@ -2,7 +2,6 @@
 session_start();
 require_once('config/config.php');
 
-
 //No es profesional de salud, no puede entrar.
 if (!($_SESSION['esProfesional']))
 {
@@ -100,7 +99,6 @@ header("Location: pacientes.php?pagina=1");
       $ConsultaBD4 = $conexion->query($ArmoConsultaBD4);
 
       while  ($Resultado4 = $ConsultaBD4->fetch_assoc()){
-
       ?>
         <!-- Datos familiar/responsable -->
       <td>
@@ -108,11 +106,10 @@ header("Location: pacientes.php?pagina=1");
           <div class="ms">
             <p class="fw-bold mb-1"><?php echo ($Resultado4['NombrePadre'] . ' ' . $Resultado4['ApellidoPadre'] )?></p>
             <p class="text-muted mb-0"><?php echo ($Resultado4['mail'])?></p>
-
-
           </div>
         </div>
       </td>
+     <!-- Fin -->
 
       <!-- Datos Hijo -->
       <td>
@@ -120,6 +117,7 @@ header("Location: pacientes.php?pagina=1");
 
       <?php if (isset($Resultado4['dni'])) {echo "(DNI)" . ' ' .number_format($Resultado4['dni'], 0, ',', '.'); } else {echo "----";} ?>
       </td>
+     <!-- Fin -->
 
      <!-- Dato estado formulario -->
       <td>
@@ -138,18 +136,23 @@ header("Location: pacientes.php?pagina=1");
         
         </span>
       </td>
+     <!-- Fin -->
 
-    <!-- Enlace detalle a formulario -->
+    <!-- Ver respuestas -->
       <td>
         <button type="submit" id="verID" name="verID" value= "<?php echo ($Resultado4['idCuestionario']); ?>" class="btn btn-link btn-sm btn-rounded" <?php if (!$completado) { echo "disabled"; }?>>
           VER
         </button>
           </td>
-          <td>
-            
-        <input type="radio" id="exportarID" name="exportarID" value= "<?php echo ($Resultado4['idCuestionario']); ?>" <?php  if(!$completado) {echo "disabled";} ?> />
-      </td>
+     <!-- Fin -->
 
+    <!-- Seleccion -->
+          <td>
+        <input type="radio"  name="exportarID" value= "<?php echo ($Resultado4['idCuestionario']); ?>" <?php  if(!$completado) {echo "disabled";} ?> />
+        </td>
+     <!-- Fin -->
+
+     
         </tr>
         <?php }?>
     <tr>

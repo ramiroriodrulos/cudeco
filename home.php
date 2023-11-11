@@ -29,6 +29,8 @@ if (!$_SESSION['esProfesional'])
     $completado = 0;
   }
 
+  $_SESSION['idCuestionarioPaciente'] = $Resultado2['idCuestionario'];
+
 }
 
 ?>

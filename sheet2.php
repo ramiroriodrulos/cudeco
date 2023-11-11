@@ -8,7 +8,7 @@ $verRespuesta = false;
 //Es profesional y no accedió desde el boton VER en 'mis pacientes', no puede entrar.
 if ($_SESSION['esProfesional'] && !isset($_SESSION['idCuestionario']))
 {
-    header("Location: index.php");
+    header("Location: home.php");
 }
 
 //Es profesional y accedió desde el boton VER en 'mis pacientes', puede entrar.
@@ -16,19 +16,20 @@ if ($_SESSION['esProfesional'] && isset($_SESSION['idCuestionario']))
 {
   $verRespuesta = true;
   $idCuestionario = $_SESSION['idCuestionario'];
+  $nombreResponsable = $_SESSION['NombreApellidoResponsable'];
+  $nombreHijo = $_SESSION['NombreHijo'];
 }
 
 
-if (isset($_GET['page'])) {
-  $page = $_GET['page'];
+if (isset($_GET['pagina'])) {
+  $pagina = $_GET['pagina'];
 }
 else {  
-  $page = 1;
+  $pagina = 1;
 }
 
 
-
-$ArmoConsultaBD1 = "SELECT Detalle, idCategoria FROM categoria WHERE pagina = $page;";
+$ArmoConsultaBD1 = "SELECT Detalle, idCategoria FROM categoria WHERE pagina = $pagina;";
 $ConsultaBD1 = $conexion->query($ArmoConsultaBD1);
 
 $ArmoConsultaBD3 = "SELECT pagina FROM categoria ORDER BY idCategoria DESC LIMIT 1;";
@@ -36,7 +37,7 @@ $ConsultaBD3 = $conexion->query($ArmoConsultaBD3);
 $Resultado3 = $ConsultaBD3->fetch_assoc();
 $UltimaPagina = $Resultado3["pagina"];
 
-$_SESSION ['paginaActual'] = $page;
+$_SESSION ['paginaActual'] = $pagina;
 $_SESSION ['ultimaPagina'] = $UltimaPagina;
 ?>
 
@@ -54,21 +55,50 @@ $_SESSION ['ultimaPagina'] = $UltimaPagina;
     <link rel="icon" href="favicon.ico" type="image/ico">
 </head>
 
+<Style>
+  @media screen and (max-width: 1000px) {
+    .infoCuestionario {
+        display: none !important;
+    }
+}
+</Style>
 <body>
    
 <?php include 'header.php'?>
 
 <section class="content">
+
+<?php if ($verRespuesta) : ?>
+                      <div class="infoCuestionario">
+                      <div class="card bg-dark text-white mb-3" style="width: 15vw; float: right; position: absolute; margin: 15px;">
+                      <div class="card-body ">
+                      <h5 class="card-title"><strong>Respuestas</strong></h5>
+                      <br>
+                      <h5 class="card-title"> <?php echo $_SESSION['NombreApellidoResponsable'] ?></h5>
+                      <h6 class="card-subtitle mb-2 text-muted">Responsable</h6>
+                      <h5 class="card-title"><?php echo $_SESSION['NombreHijo']  ?></h5>
+                      <h6 class="card-subtitle mb-2 text-muted">Hijo/a</h6>      
+                      <br>               
+                        <a href="pacientes.php" class="btn btn-light text-center">Volver a mis pacientes</a>
+                      </div>
+                    </div>
+                    </div>
+<?php endif;?>
+
   <div class="container">
     <!-- Contendor formulario -->
     <div class="row">
     <div class="col-md-2"></div>
                 <div class="col-md-8 p-2">
                 <div class="card bg-danger text-center text-white">
-                        <h3>1ª Parte: el uso de las palabras</h3>
+                        <h3>1ª Parte A. El uso de las palabras</h3>
+                    </div>
+                    <br>
+                    <div class="card bg-info text-center text-white">
+                    <h5>Lista de vocabularios</h5>
                     </div>
 
-                    <form action="cuestionario.php" method="POST">
+                    <form action="cuestionario2.php" method="POST">
                       <hr>
                       <?php
                         while  ($Resultado1 = $ConsultaBD1->fetch_assoc()){
@@ -119,29 +149,30 @@ $_SESSION ['ultimaPagina'] = $UltimaPagina;
 
                         <?php }?> 
                       
+                        <!-- Paginador -->
                             <div class="text-center">
-                            <button type="submit" class="btn btn-primary btn-lg" <?php if ($page == 1) echo "disabled" ?> name="accion" value="atras" >Atrás</button>
-                            <button type="submit" class="btn btn-primary btn-lg" <?php if ($page == $UltimaPagina) echo "disabled" ?> name="accion" value="siguiente">Siguiente</button>
-                            
-                            <!-- Muestro el boton completar solo si es un familiar/responsable -->
-                            <?php if (!$verRespuesta) :?>
-                            <button type="submit" class="btn btn-dark btn-lg" <?php if ($page != $UltimaPagina) echo "disabled" ?> name="accion" value="completar">Completar</button>
-                            <?php endif;?>
-                          </div>    
-      
-                      
-                        <hr>
-                      <div class="container" style="display: flex; justify-content: center;">
-                <nav aria-label="Page navigation example">
-                  <ul class="pagination">
+                            <button type="submit" class="btn btn-danger btn-lg" <?php if ($pagina != 1) echo "hidden" ?> name="accion" value="anterior" >Parte anterior</button>
 
-                  <?php 
-                    for ($i = 1; $i <= $UltimaPagina; $i++) {;
-                    ?>
-                    <li class="page-item <?php if ($page == $i) echo "active" ?>"><a class="page-link" > <?php echo $i?> </a></li>
-                    <?php } ?>
-                  </ul>
-         </nav>              
+                            <button type="submit" class="btn btn-danger btn-lg" <?php if ($pagina == 1) echo "hidden" ?> name="accion" value="atras" >Atrás</button>
+
+                            <button type="submit" class="btn btn-danger btn-lg" <?php if ($pagina == $UltimaPagina) echo "hidden" ?> name="accion" value="siguiente">Siguiente</button>
+
+                            <button type="submit" class="btn btn-danger btn-lg" <?php if ($pagina != $UltimaPagina) echo "hidden" ?> name="accion" value="proxima">Próxima parte</button>
+                      
+                          <hr>
+                            <div class="container" style="display: flex; justify-content: center;">
+                      <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+
+                        <?php 
+                          for ($i = 1; $i <= $UltimaPagina; $i++) {;
+                          ?>
+                          <li class="page-item <?php if ($pagina == $i) echo "active" ?>"><a class="page-link" > <?php echo $i?> </a></li>
+                          <?php } ?>
+                        </ul>
+                      </nav>   
+                
+                      <!-- Fin paginador  -->
                     </form>
                 </div>
                 <div class="col-md-2"></div>              

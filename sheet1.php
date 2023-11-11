@@ -22,9 +22,18 @@ if ($_SESSION['esProfesional'] && isset($_SESSION['idCuestionario']))
     $Resultado1 = $ConsultaBD1->fetch_assoc();
 
     $nombre = $Resultado1["nombre"];
-    $dni = $Resultado1["dni"];
+    $dni = number_format($Resultado1["dni"], 0, ',', '.');
     $fechaNacimiento = $Resultado1["fechaNacimiento"];
     $sexo = $Resultado1["sexo"];
+
+    $ArmoConsultaBD2 = "SELECT u.nombre,u.apellido FROM usuario u
+                        INNER JOIN responsable r ON u.idUsuario = r.idUsuario
+                        WHERE r.idResponsable = (SELECT idResponsable FROM cuestionario c WHERE c.idCuestionario = $idCuestionario)";
+    $ConsultaBD2 = $conexion->query($ArmoConsultaBD2);
+    $Resultado2 = $ConsultaBD2->fetch_assoc();
+
+    $_SESSION['NombreApellidoResponsable'] = $Resultado2["nombre"] . " " . $Resultado2["apellido"];
+    $_SESSION['NombreHijo'] = $nombre;
 }
 
 ?>
@@ -42,11 +51,37 @@ if ($_SESSION['esProfesional'] && isset($_SESSION['idCuestionario']))
     <link rel="icon" href="favicon.ico" type="image/ico">
 </head>
 
+<Style>
+  @media screen and (max-width: 1000px) {
+    .infoCuestionario {
+        display: none !important;
+    }
+}
+</Style>
+
 <body>
    
 <?php include 'header.php'?>
 
-    <section class="content" style="height: 60vh;display: flex; align-items: center; justify-content: center;">
+<?php if ($verRespuesta) : ?>
+                    <div class="infoCuestionario">
+                      <div class="card bg-dark text-white mb-3" style="width: 15vw; float: right; position: absolute; margin: 15px;">
+                      <div class="card-body ">
+                      <h5 class="card-title"><strong>Respuestas</strong></h5>
+                      <br>
+                      <h5 class="card-title"> <?php echo $_SESSION['NombreApellidoResponsable'] ?></h5>
+                      <h6 class="card-subtitle mb-2 text-muted">Responsable</h6>
+                      <h5 class="card-title"><?php echo $_SESSION['NombreHijo']  ?></h5>
+                      <h6 class="card-subtitle mb-2 text-muted">Hijo/a</h6>      
+                      <br>               
+                        <a href="pacientes.php" class="btn btn-light text-center">Volver a mis pacientes</a>
+                      </div>
+                    </div>
+                    </div>
+<?php endif;?>
+    <section class="content">
+
+    
         <div class="container">
             <div class="row">
                 <div class="col-md-2"></div>
@@ -54,7 +89,7 @@ if ($_SESSION['esProfesional'] && isset($_SESSION['idCuestionario']))
                     <div class="card bg-danger text-center text-white">
                         <h3>Datos hijo/a</h3>
                     </div>
-                    <form action="registrohijo.php" method="POST">
+                    <form action="cuestionario1.php" method="POST">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-sm-12">
@@ -66,7 +101,7 @@ if ($_SESSION['esProfesional'] && isset($_SESSION['idCuestionario']))
 
                                     <div class="form-group">
                                         <label for="dni">Número de identificación</label>
-                                        <input type="text" class="form-control" name="dni" id="dni" placeholder="" <?php if($verRespuesta){ echo " value=$dni disabled";}?> >
+                                        <input type="text" class="form-control"  name="dni" id="dni" placeholder="" <?php if($verRespuesta){ echo " value=$dni disabled";}?> >
                                     </div>
                                     
                                     <span>Sexo</span>
